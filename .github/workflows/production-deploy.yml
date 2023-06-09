@@ -48,4 +48,4 @@ jobs:
             cd /app
             tar -xzf app.tgz
             docker load -i app.tgz
-            docker-compose up --detach --remove-orphans --wait
+            docker compose up --detach --remove-orphans --wait
