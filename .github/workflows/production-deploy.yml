@@ -1,5 +1,5 @@
 name: production-deploy
-on: 
+on:
   push:
     branches: [master]
 
@@ -9,18 +9,18 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-    
+
     steps:
-      
+
       - name: Copy repository
         uses: actions/checkout@v3
-      
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-     - name: Build and Package Docker Image
+      - name: Build and Package Docker Image
         run: |
           docker build --target prod -t aguirresabino/app .
           docker save aguirresabino/app | gzip > app.tgz
