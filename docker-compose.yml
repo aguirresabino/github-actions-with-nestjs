@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    image: aguirresabino/app
+    container_name: app
+    restart: always
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: 10
+        max-size: 10m
+    ports:
+      - '80:3000'
