@@ -37,6 +37,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: 'docker-compose.yml,app.tgz'
           target: /app
+          timeout: 10m
 
       - name: Connect to Server and Deploy
         uses: appleboy/ssh-action@v0.1.10
