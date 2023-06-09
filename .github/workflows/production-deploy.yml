@@ -1,0 +1,52 @@
+name: production-deploy
+on: 
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      
+      - name: Copy repository
+        uses: actions/checkout@v3
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+     - name: Build and Package Docker Image
+        run: |
+          docker build --target prod -t aguirresabino/app .
+          docker save aguirresabino/app | gzip > app.tgz
+
+      - name: Configure SSH Key
+        uses: webfactory/ssh-agent@v0.4.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Transfer Docker Image to Server
+        uses: appleboy/scp-action@v0.0.1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml,app.tgz"
+          target: /app
+
+      - name: Connect to Server and Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /app
+            tar -xzf app.tgz
+            docker load -i app.tgz
+            docker-compose up --detach --remove-orphans --wait
